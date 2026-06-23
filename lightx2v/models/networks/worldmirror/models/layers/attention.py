@@ -11,9 +11,12 @@ try:
 
     _USE_FLASH_ATTN_V3 = True
 except ImportError:
-    from flash_attn.flash_attn_interface import flash_attn_func as flash_attn_func_v2
+    try:
+        from flash_attn.flash_attn_interface import flash_attn_func as flash_attn_func_v2
 
-    _USE_FLASH_ATTN_V3 = False
+        _USE_FLASH_ATTN_V3 = False
+    except ImportError:
+        _USE_FLASH_ATTN_V3 = None
 from ...comm.communication import _All2All
 from ...comm.padding import depad_by_length, pad_by_length
 
@@ -55,7 +58,7 @@ class Attention(nn.Module):
         return q, k, v, B, N, C
 
     def _apply_attention(self, q: Tensor, k: Tensor, v: Tensor) -> Tensor:
-        if q.dtype == torch.bfloat16 or q.dtype == torch.float16:
+        if _USE_FLASH_ATTN_V3 is not None and (q.dtype == torch.bfloat16 or q.dtype == torch.float16):
             if q.is_contiguous():
                 q = q.transpose(1, 2)
             else:

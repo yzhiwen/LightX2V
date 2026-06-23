@@ -97,11 +97,10 @@ def _has_model_files(path: str) -> bool:
 
 def _load_model_config(model_dir: str) -> dict:
     """Load model.config from a model dir, handling yaml or json."""
-    from omegaconf import OmegaConf
-
     yaml_path = os.path.join(model_dir, "config.yaml")
     json_path = os.path.join(model_dir, "config.json")
     if os.path.isfile(yaml_path):
+        from omegaconf import OmegaConf
         cfg = OmegaConf.load(yaml_path)
         return _get_model_config_from_yaml(cfg)
     if os.path.isfile(json_path):
